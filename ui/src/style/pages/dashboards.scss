@@ -287,6 +287,9 @@ $dash-graph-options-arrow: 8px;
   div:nth-child(2) {left: 50%; animation: refreshingSpinnerB 0.8s cubic-bezier(0.645, 0.045, 0.355, 1) infinite; }
   div:nth-child(3) {left: 100%; animation: refreshingSpinnerC 0.8s cubic-bezier(0.645, 0.045, 0.355, 1) infinite;}
 }
+.presentation-mode .graph-panel__refreshing {
+  right: 16px !important;
+}
 
 /*
   Dashboard Edit Mode
