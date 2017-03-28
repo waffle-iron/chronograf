@@ -1,10 +1,11 @@
-import React, {PropTypes} from 'react';
-import AlertsTable from '../components/AlertsTable';
-import SourceIndicator from '../../shared/components/SourceIndicator';
-import {getAlerts} from '../apis';
-import AJAX from 'utils/ajax';
-import _ from 'lodash';
-import NoKapacitorError from '../../shared/components/NoKapacitorError';
+import React, {PropTypes} from 'react'
+import AlertsTable from '../components/AlertsTable'
+import SourceIndicator from '../../shared/components/SourceIndicator'
+import {getAlerts} from '../apis'
+import AJAX from 'utils/ajax'
+import _ from 'lodash'
+import NoKapacitorError from '../../shared/components/NoKapacitorError'
+import CustomTimeRange from '../../shared/components/CustomTimeRange'
 
 const AlertsApp = React.createClass({
   propTypes: {
@@ -80,7 +81,7 @@ const AlertsApp = React.createClass({
       const {source} = this.props;
       if (this.state.hasKapacitor) {
         component = (
-          <AlertsTable source={source} alerts={this.state.alerts} />
+          <AlertsTable source={source} alerts={this.state.alerts.slice(0,10)} />
         );
       } else {
         component = <NoKapacitorError source={source} />;
@@ -92,8 +93,6 @@ const AlertsApp = React.createClass({
   render() {
     const {source} = this.props;
     return (
-      // I stole this from the Hosts page.
-      // Perhaps we should create an abstraction?
       <div className="page">
         <div className="page-header">
           <div className="page-header__container">
@@ -104,6 +103,7 @@ const AlertsApp = React.createClass({
             </div>
             <div className="page-header__right">
               <SourceIndicator sourceName={source.name} />
+              <CustomTimeRange onApplyTimeRange={() => {}} timeRange={{upper: null, lower: null}}/>
             </div>
           </div>
         </div>
