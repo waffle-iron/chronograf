@@ -52,6 +52,12 @@ const AlertsApp = React.createClass({
     });
   },
 
+  componentDidUpdate(prevProps, prevState) {
+    if (!_.isEqual(prevState.timeRange, this.state.timeRange)) {
+      this.fetchAlerts()
+    }
+  },
+
   fetchAlerts() {
     getAlerts(this.props.source.links.proxy, this.state.timeRange).then((resp) => {
       const results = [];
@@ -106,8 +112,13 @@ const AlertsApp = React.createClass({
     this.setState({isTimeOpen: false})
   },
 
+  handleApplyTime(timeRange) {
+    this.setState({timeRange})
+  },
+
   render() {
-    const {source} = this.props;
+    const {source} = this.props
+    const {timeRange} = this.state
     return (
       <div className="page">
         <div className="page-header">
@@ -123,8 +134,8 @@ const AlertsApp = React.createClass({
                 isVisible={this.state.isTimeOpen}
                 onToggle={this.handleToggleTime}
                 onClose={this.handleCloseTime}
-                onApplyTimeRange={(timeRange) => console.log(timeRange)}
-                timeRange={{upper: null, lower: null}}
+                onApplyTimeRange={this.handleApplyTime}
+                timeRange={timeRange}
               />
             </div>
           </div>
@@ -133,7 +144,7 @@ const AlertsApp = React.createClass({
           <div className="container-fluid">
             <div className="row">
               <div className="col-md-12">
-                { this.renderSubComponents() }
+                {this.renderSubComponents()}
               </div>
             </div>
           </div>
