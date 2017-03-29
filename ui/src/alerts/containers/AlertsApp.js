@@ -89,7 +89,7 @@ const AlertsApp = React.createClass({
       const {source} = this.props;
       if (this.state.hasKapacitor) {
         component = (
-          <AlertsTable source={source} alerts={this.state.alerts.slice(0, 10)} />
+          <AlertsTable source={source} alerts={this.state.alerts} />
         );
       } else {
         component = <NoKapacitorError source={source} />;
