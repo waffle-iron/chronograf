@@ -32,7 +32,8 @@ const AlertsApp = React.createClass({
         upper: moment().format(),
         lower: moment().subtract(1, 'h').format(),
       },
-    };
+      isTimeOpen: false,
+    }
   },
   // TODO: show a loading screen until we figure out if there is a kapacitor and fetch the alerts
   componentDidMount() {
@@ -88,13 +89,21 @@ const AlertsApp = React.createClass({
       const {source} = this.props;
       if (this.state.hasKapacitor) {
         component = (
-          <AlertsTable source={source} alerts={this.state.alerts.slice(0,10)} />
+          <AlertsTable source={source} alerts={this.state.alerts.slice(0, 10)} />
         );
       } else {
         component = <NoKapacitorError source={source} />;
       }
     }
     return component;
+  },
+
+  handleToggleTime() {
+    this.setState({isTimeOpen: !this.state.isTimeOpen})
+  },
+
+  handleCloseTime() {
+    this.setState({isTimeOpen: false})
   },
 
   render() {
@@ -110,7 +119,13 @@ const AlertsApp = React.createClass({
             </div>
             <div className="page-header__right">
               <SourceIndicator sourceName={source.name} />
-              <CustomTimeRange onApplyTimeRange={(timeRange) => console.log(timeRange)} timeRange={{upper: null, lower: null}}/>
+              <CustomTimeRange
+                isVisible={this.state.isTimeOpen}
+                onToggle={this.handleToggleTime}
+                onClose={this.handleCloseTime}
+                onApplyTimeRange={(timeRange) => console.log(timeRange)}
+                timeRange={{upper: null, lower: null}}
+              />
             </div>
           </div>
         </div>
