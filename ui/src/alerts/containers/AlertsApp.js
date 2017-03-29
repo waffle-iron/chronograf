@@ -1,11 +1,14 @@
 import React, {PropTypes} from 'react'
-import AlertsTable from '../components/AlertsTable'
 import SourceIndicator from '../../shared/components/SourceIndicator'
-import {getAlerts} from '../apis'
-import AJAX from 'utils/ajax'
-import _ from 'lodash'
+import AlertsTable from '../components/AlertsTable'
 import NoKapacitorError from '../../shared/components/NoKapacitorError'
 import CustomTimeRange from '../../shared/components/CustomTimeRange'
+
+import {getAlerts} from '../apis'
+import AJAX from 'utils/ajax'
+
+import _ from 'lodash'
+import moment from 'moment'
 
 const AlertsApp = React.createClass({
   propTypes: {
@@ -25,6 +28,10 @@ const AlertsApp = React.createClass({
       loading: true,
       hasKapacitor: false,
       alerts: [],
+      timeRange: {
+        upper: moment().format(),
+        lower: moment().subtract(1, 'h').format(),
+      },
     };
   },
   // TODO: show a loading screen until we figure out if there is a kapacitor and fetch the alerts
@@ -45,7 +52,7 @@ const AlertsApp = React.createClass({
   },
 
   fetchAlerts() {
-    getAlerts(this.props.source.links.proxy).then((resp) => {
+    getAlerts(this.props.source.links.proxy, this.state.timeRange).then((resp) => {
       const results = [];
 
       const alertSeries = _.get(resp, ['data', 'results', '0', 'series'], []);
