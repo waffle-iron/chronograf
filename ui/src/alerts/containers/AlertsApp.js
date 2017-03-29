@@ -1,4 +1,4 @@
-import React, {PropTypes} from 'react'
+import React, {PropTypes, Component} from 'react'
 import SourceIndicator from '../../shared/components/SourceIndicator'
 import AlertsTable from '../components/AlertsTable'
 import NoKapacitorError from '../../shared/components/NoKapacitorError'
@@ -10,69 +10,65 @@ import AJAX from 'utils/ajax'
 import _ from 'lodash'
 import moment from 'moment'
 
-const AlertsApp = React.createClass({
-  propTypes: {
-    source: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      type: PropTypes.string, // 'influx-enterprise'
-      links: PropTypes.shape({
-        proxy: PropTypes.string.isRequired,
-      }).isRequired,
-    }), // .isRequired,
-    addFlashMessage: PropTypes.func, // .isRequired,
-  },
-
-  getInitialState() {
-    return {
+class AlertsApp extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
       loading: true,
       hasKapacitor: false,
       alerts: [],
       timeRange: {
         upper: moment().format(),
-        lower: moment().subtract(1, 'h').format(),
+        lower: moment().subtract(1, 'd').format(),
       },
       isTimeOpen: false,
     }
-  },
+
+    this.fetchAlerts = ::this.fetchAlerts
+    this.renderSubComponents = ::this.renderSubComponents
+    this.handleToggleTime = ::this.handleToggleTime
+    this.handleCloseTime = ::this.handleCloseTime
+    this.handleApplyTime = ::this.handleApplyTime
+  }
+
   // TODO: show a loading screen until we figure out if there is a kapacitor and fetch the alerts
   componentDidMount() {
-    const {source} = this.props;
+    const {source} = this.props
     AJAX({
       url: source.links.kapacitors,
       method: 'GET',
     }).then(({data}) => {
       if (data.kapacitors[0]) {
-        this.setState({hasKapacitor: true});
+        this.setState({hasKapacitor: true})
 
-        this.fetchAlerts();
+        this.fetchAlerts()
       } else {
-        this.setState({loading: false});
+        this.setState({loading: false})
       }
-    });
-  },
+    })
+  }
 
   componentDidUpdate(prevProps, prevState) {
     if (!_.isEqual(prevState.timeRange, this.state.timeRange)) {
       this.fetchAlerts()
     }
-  },
+  }
 
   fetchAlerts() {
     getAlerts(this.props.source.links.proxy, this.state.timeRange).then((resp) => {
-      const results = [];
+      const results = []
 
-      const alertSeries = _.get(resp, ['data', 'results', '0', 'series'], []);
+      const alertSeries = _.get(resp, ['data', 'results', '0', 'series'], [])
       if (alertSeries.length === 0) {
-        this.setState({loading: false, alerts: []});
-        return;
+        this.setState({loading: false, alerts: []})
+        return
       }
 
-      const timeIndex = alertSeries[0].columns.findIndex((col) => col === 'time');
-      const hostIndex = alertSeries[0].columns.findIndex((col) => col === 'host');
-      const valueIndex = alertSeries[0].columns.findIndex((col) => col === 'value');
-      const levelIndex = alertSeries[0].columns.findIndex((col) => col === 'level');
-      const nameIndex = alertSeries[0].columns.findIndex((col) => col === 'alertName');
+      const timeIndex = alertSeries[0].columns.findIndex((col) => col === 'time')
+      const hostIndex = alertSeries[0].columns.findIndex((col) => col === 'host')
+      const valueIndex = alertSeries[0].columns.findIndex((col) => col === 'value')
+      const levelIndex = alertSeries[0].columns.findIndex((col) => col === 'level')
+      const nameIndex = alertSeries[0].columns.findIndex((col) => col === 'alertName')
 
       alertSeries[0].values.forEach((s) => {
         results.push({
@@ -81,40 +77,40 @@ const AlertsApp = React.createClass({
           value: `${s[valueIndex]}`,
           level: s[levelIndex],
           name: `${s[nameIndex]}`,
-        });
-      });
-      this.setState({loading: false, alerts: results});
-    });
-  },
+        })
+      })
+      this.setState({loading: false, alerts: results})
+    })
+  }
 
   renderSubComponents() {
-    let component;
+    let component
     if (this.state.loading) {
-      component = (<p>Loading...</p>);
+      component = (<p>Loading...</p>)
     } else {
-      const {source} = this.props;
+      const {source} = this.props
       if (this.state.hasKapacitor) {
         component = (
           <AlertsTable source={source} alerts={this.state.alerts} />
-        );
+        )
       } else {
-        component = <NoKapacitorError source={source} />;
+        component = <NoKapacitorError source={source} />
       }
     }
-    return component;
-  },
+    return component
+  }
 
   handleToggleTime() {
     this.setState({isTimeOpen: !this.state.isTimeOpen})
-  },
+  }
 
   handleCloseTime() {
     this.setState({isTimeOpen: false})
-  },
+  }
 
   handleApplyTime(timeRange) {
     this.setState({timeRange})
-  },
+  }
 
   render() {
     const {source} = this.props
@@ -150,9 +146,26 @@ const AlertsApp = React.createClass({
           </div>
         </div>
       </div>
-    );
-  },
+    )
+  }
+}
 
-});
+const {
+  func,
+  shape,
+  string,
+} = PropTypes
 
-export default AlertsApp;
+AlertsApp.propTypes = {
+  source: shape({
+    id: string.isRequired,
+    name: string.isRequired,
+    type: string, // 'influx-enterprise'
+    links: shape({
+      proxy: string.isRequired,
+    }).isRequired,
+  }),
+  addFlashMessage: func,
+}
+
+export default AlertsApp
